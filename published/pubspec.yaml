@@ -1,0 +1,13 @@
+name: published
+description: A new Flutter package.
+version: 0.0.1
+homepage:
+
+environment:
+  sdk: ">=2.13.0 <3.0.0"
+
+dependencies:
+  rxdart: ^0.27.2
+
+
+

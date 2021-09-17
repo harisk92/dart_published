@@ -1,0 +1,13 @@
+targets:
+  $default:
+    builders:
+      published:
+        enabled: true
+
+builders:
+  published:
+    import: "package:published_gen/builder.dart"
+    builder_factories: ["published"]
+    build_extensions: { ".dart": [".published.dart"] }
+    auto_apply: dependents
+    build_to: source
