@@ -13,6 +13,6 @@ class SetterTemplate {
 
   @override
   String toString() {
-    return "$definition => this.$fieldName.add(value);";
+    return "$definition => this.\$$fieldName.add(value);";
   }
 }

@@ -6,8 +6,8 @@ import 'package:published/published.dart';
 import 'package:source_gen/source_gen.dart';
 
 import 'field_element_visitor.dart';
-import 'templates/class_template.dart';
-import 'templates/extension_template.dart';
+import 'templates/base_class_template.dart';
+import 'templates/child_class_template.dart';
 
 class PublishedGenerator extends GeneratorForAnnotation<PublishedAnnotation> {
   @override
@@ -27,19 +27,18 @@ class PublishedGenerator extends GeneratorForAnnotation<PublishedAnnotation> {
     final targetClassName = "_$className";
     final fields = visitor.fields;
 
-    final classTemplate = ClassTemplate(
+    final childClassTemplate = ChildClassTemplate(
       name: targetClassName,
       parentClassName: className,
       fields: fields,
-      constructor: element.getNamedConstructor("make"),
     );
 
-    final extensionTemplate = ExtensionTemplate(
-        name: className,
-        getters: fields.map((field) => field.getterTemplate).toList(),
-        setters: fields.map((field) => field.setterTemplate).toList());
+    final baseClassTemplate = BaseClassTemplate(
+      name: className,
+      fields: fields,
+    );
 
-    for (final template in [extensionTemplate, classTemplate]) {
+    for (final template in [baseClassTemplate, childClassTemplate]) {
       yield "$template \n";
     }
   }

@@ -1,7 +1,11 @@
 import 'package:analyzer/dart/element/element.dart';
 import 'package:analyzer/dart/element/visitor.dart';
+import 'package:published/published.dart';
+import 'package:source_gen/source_gen.dart';
 
 import 'field_blueprint.dart';
+
+final _publisherTypeChecker = TypeChecker.fromRuntime(Publisher);
 
 final stripGenericType = (String type) {
   final start = type.indexOf("<");
@@ -13,24 +17,17 @@ class FieldElementVisitor extends SimpleElementVisitor {
 
   @override
   visitFieldElement(FieldElement element) {
-    if (!element.name.startsWith("\$")) return;
-
-    final fieldType = element.type.toString();
-
-    if (!fieldType.startsWith("BehaviorSubject")) {
-      throw Exception("Field is not of type Published");
-    }
-
-    final type = fieldType.toString().substring(
-          fieldType.toString().indexOf("<") + 1,
-          fieldType.toString().length - 1,
-        );
-
-    print("Processing field : ${element.name} of type $type");
+    final annotation = _publisherTypeChecker.firstAnnotationOf(element);
+    /*if (annotation != null) {
+      final reader = ConstantReader(annotation);
+      final String value = reader.read("defaultValue").literalValue.toString();
+      print(value);
+    }*/
 
     final field = FieldBlueprint(
       name: element.name,
-      type: type,
+      type: element.type.toString(),
+      isPublisher: annotation != null,
     );
 
     fields.add(field);

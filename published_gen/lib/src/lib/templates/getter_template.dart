@@ -13,6 +13,6 @@ class GetterTemplate {
 
   @override
   String toString() {
-    return "$definition => this.$fieldName.value;";
+    return "$definition => this.\$$fieldName.value;";
   }
 }
