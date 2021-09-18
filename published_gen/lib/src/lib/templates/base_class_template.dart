@@ -20,6 +20,10 @@ class BaseClassTemplate {
     return '''
     abstract class _\$${name} extends ObservableObject{
        ${fields.map(fieldDefinition).join("\n")}
+       
+       abstract final Stream didChange;
+       
+       bool get enableLogging => false;
     }
     ''';
   }

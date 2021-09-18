@@ -17,17 +17,24 @@ class FieldElementVisitor extends SimpleElementVisitor {
 
   @override
   visitFieldElement(FieldElement element) {
+    if (!element.isAbstract) return;
+
     final annotation = _publisherTypeChecker.firstAnnotationOf(element);
-    /*if (annotation != null) {
-      final reader = ConstantReader(annotation);
-      final String value = reader.read("defaultValue").literalValue.toString();
-      print(value);
-    }*/
+
+    final defaultValueReader = ConstantReader(annotation).peek("defaultValue");
+
+    if (defaultValueReader != null) {
+      final checker = TypeChecker.fromStatic(element.type);
+      if (!defaultValueReader.instanceOf(checker))
+        throw UnsupportedError(
+            "Default value of ${element.name} is not of type ${element.type}");
+    }
 
     final field = FieldBlueprint(
       name: element.name,
       type: element.type.toString(),
       isPublisher: annotation != null,
+      defaultValue: defaultValueReader?.literalValue,
     );
 
     fields.add(field);

@@ -26,7 +26,11 @@ class ChildClassTemplate {
     if (field.defaultValue == null)
       return "this.\$${field.name} = BehaviorSubject.seeded(${field.name})";
 
-    return "this.\$${field.name} = BehaviorSubject.seeded(${field.defaultValue})";
+    if (field.defaultValue is String) {
+      return "this.\$${field.name} = BehaviorSubject.seeded(${field.name} ?? \"${field.defaultValue}\")";
+    }
+
+    return "this.\$${field.name} = BehaviorSubject.seeded(${field.name} ?? ${field.defaultValue})";
   }
 
   String fieldDefinition(FieldBlueprint field) {
@@ -42,18 +46,39 @@ class ChildClassTemplate {
   @override
   String toString() {
     return '''
-    class $name extends $parentClassName{
+    class $name extends ${parentClassName}Builder{
       ${fields.where((element) => !element.isPublisher).map(fieldDefinition).join("\n")}
       
       ${fields.where((element) => element.isPublisher).map(fieldDefinition).join("\n")}
       
-      
-      $name({${fields.map(parameterDefinition).join(",")}}):${fields.map(parameterAssignment).join(",")};
+     
+      $name({${fields.map(parameterDefinition).join(",")}}):${fields.map(parameterAssignment).join(",")}{
+        this.shouldEnableLogger();
+      }
       
       ${fields.where((element) => element.isPublisher).map((field) => field.getterTemplate).join("\n")}
       
       ${fields.where((element) => element.isPublisher).map((field) => field.setterTemplate).join("\n")}
 
+
+     Stream get didChange => MergeStream([
+       ${fields.where((element) => element.isPublisher).map((field) => "\$${field.name}").join(",")}
+     ]);
+     
+     void shouldEnableLogger(){
+         if(!enableLogging) return;
+         
+         didChange.listen(dumpLogOnChange).addTo(disposables);
+     }
+     
+     void dumpLogOnChange(signal){
+       print("------------------");
+       print("DidChange:");
+       print("$parentClassName{");
+       ${fields.where((element) => element.isPublisher).map((field) => 'print(" ${field.name}: \${this.${field.name}}");').join("\n")}
+       print("}");
+       print("------------------");
+     }
       
       @override
       void dispose(){
