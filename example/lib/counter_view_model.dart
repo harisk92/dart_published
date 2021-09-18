@@ -2,15 +2,20 @@ import 'package:published/published.dart';
 
 part 'counter_view_model.published.dart';
 
-@PublishedAnnotation()
+@published
 abstract class CounterViewModel extends _$CounterViewModel {
-  @Publisher(defaultValue: 0)
+  @Publisher(defaultValue: 2)
   abstract int count;
+
+  @Publisher(defaultValue: "Haris")
+  abstract String name;
 
   CounterViewModel();
 
-  factory CounterViewModel.make({required int count}) =>
-      _CounterViewModel(count: count);
+  factory CounterViewModel.make() => _CounterViewModel();
 
   void increment() => count++;
+
+  @override
+  bool get enableLogging => true;
 }

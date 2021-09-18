@@ -36,7 +36,7 @@ class MyHomePage extends HookWidget {
   @override
   Widget build(BuildContext context) {
     final counterViewModel = useViewModel<CounterViewModel>(
-      CounterViewModel.make(count: 3),
+      CounterViewModel.make(),
       onInit: (viewModel) => print("Hola"),
       observe: (viewModel) => [
         viewModel.$count.listen((value) {
@@ -87,13 +87,13 @@ typedef ErrorWidgetBuilder = Widget Function(
 
 class PublishedBuilder<T> extends StreamBuilder<T> {
   PublishedBuilder(
-    Published<T> published, {
+    BehaviorSubject<T> publisher, {
     required ResultWidgetBuilder<T> onResult,
     LoadingWidgetBuilder? onLoading,
     ErrorWidgetBuilder? onError,
   }) : super(
-          stream: published,
-          initialData: published.value,
+          stream: publisher,
+          initialData: publisher.value,
           builder: (context, snapshot) {
             if (snapshot.hasError) {
               print("Error");
@@ -112,12 +112,4 @@ class PublishedBuilder<T> extends StreamBuilder<T> {
             return Container();
           },
         );
-}
-
-class SuccessWidget extends StatelessWidget {
-  @override
-  Widget build(BuildContext context) {
-    // TODO: implement build
-    throw UnimplementedError();
-  }
 }
