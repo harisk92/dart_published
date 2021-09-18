@@ -17,7 +17,14 @@ abstract class _$CounterViewModel extends ObservableObject {
   bool get enableLogging => false;
 }
 
-class _CounterViewModel extends CounterViewModel {
+abstract class CounterViewModelBuilder extends CounterViewModel {
+  CounterViewModelBuilder();
+
+  factory CounterViewModelBuilder.build({int? count, String? name}) =>
+      _CounterViewModel(count: count, name: name);
+}
+
+class _CounterViewModel extends CounterViewModelBuilder {
   final BehaviorSubject<int> $count;
   final BehaviorSubject<String> $name;
 
@@ -56,5 +63,51 @@ class _CounterViewModel extends CounterViewModel {
     super.dispose();
     $count.close();
     $name.close();
+  }
+}
+
+abstract class _$NewViewModel extends ObservableObject {
+  abstract final BehaviorSubject<T> $age;
+
+  abstract final Stream didChange;
+
+  bool get enableLogging => false;
+}
+
+abstract class NewViewModelBuilder extends NewViewModel {
+  NewViewModelBuilder();
+
+  factory NewViewModelBuilder.build({required T age}) =>
+      _NewViewModel(age: age);
+}
+
+class _NewViewModel extends NewViewModelBuilder {
+  T age;
+
+  _NewViewModel({required T age}) : this.age = age {
+    this.shouldEnableLogger();
+  }
+
+  Stream get didChange => MergeStream([]);
+
+  void shouldEnableLogger() {
+    if (!enableLogging) return;
+
+    didChange.listen(dumpLogOnChange).addTo(disposables);
+  }
+
+  void dumpLogOnChange(signal) {
+    print("------------------");
+    print("DidChange:");
+    print("NewViewModel{");
+
+    print("}");
+    print("------------------");
+  }
+
+  @override
+  void dispose() {
+    super.dispose();
+    $age.close();
   }
 }

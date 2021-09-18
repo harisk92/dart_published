@@ -10,10 +10,6 @@ abstract class CounterViewModel extends _$CounterViewModel {
   @Publisher(defaultValue: "Haris")
   abstract String name;
 
-  CounterViewModel();
-
-  factory CounterViewModel.make() => _CounterViewModel();
-
   void increment() => count++;
 
   @override
