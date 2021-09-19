@@ -26,15 +26,20 @@ class FieldElementVisitor extends SimpleElementVisitor {
     if (defaultValueReader != null) {
       final checker = TypeChecker.fromStatic(element.type);
       if (!defaultValueReader.instanceOf(checker))
-        throw UnsupportedError(
-            "Default value of ${element.name} is not of type ${element.type}");
+        throw InvalidGenerationSourceError(
+          "Default value of ${element.name} is not of type ${element.type}",
+          element: element,
+        );
     }
 
     final field = FieldBlueprint(
-      name: element.name,
+      name:
+          element.isPrivate ? element.name.replaceFirst("_", "") : element.name,
       type: element.type.toString(),
       isPublisher: annotation != null,
       defaultValue: defaultValueReader?.literalValue,
+      isFinal: element.isFinal,
+      isPrivate: element.isPrivate,
     );
 
     fields.add(field);

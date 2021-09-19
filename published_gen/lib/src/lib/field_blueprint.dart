@@ -7,6 +7,7 @@ class FieldBlueprint {
   final String type;
   final bool isPublisher;
   final bool isFinal;
+  final bool isPrivate;
   final Object? defaultValue;
 
   FieldBlueprint({
@@ -15,6 +16,7 @@ class FieldBlueprint {
     this.defaultValue,
     this.isPublisher = false,
     this.isFinal = false,
+    this.isPrivate = false,
   });
 
   GetterTemplate get getterTemplate => GetterTemplate(

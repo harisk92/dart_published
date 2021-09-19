@@ -10,6 +10,14 @@ import 'field_element_visitor.dart';
 import 'templates/base_class_template.dart';
 import 'templates/child_class_template.dart';
 
+extension on ClassElement {
+  String get genericConstraints {
+    final value = thisType.toString();
+    final index = value.indexOf("<");
+    return index == -1 ? "" : value.substring(index, value.length);
+  }
+}
+
 class PublishedGenerator extends GeneratorForAnnotation<Published> {
   @override
   Stream<String> generateForAnnotatedElement(
@@ -18,10 +26,16 @@ class PublishedGenerator extends GeneratorForAnnotation<Published> {
     BuildStep buildStep,
   ) async* {
     if (element is! ClassElement)
-      throw UnsupportedError("Can be only used on class");
+      throw InvalidGenerationSourceError(
+        "Can be only used on class",
+        element: element,
+      );
 
     if (!element.isAbstract) {
-      throw UnsupportedError("Can be only used on abstract class");
+      throw InvalidGenerationSourceError(
+        "Can be only used on abstract class",
+        element: element,
+      );
     }
 
     final visitor = FieldElementVisitor();
@@ -36,16 +50,19 @@ class PublishedGenerator extends GeneratorForAnnotation<Published> {
       name: targetClassName,
       parentClassName: className,
       fields: fields,
+      genericConstraints: element.genericConstraints,
     );
 
     final baseClassTemplate = BaseClassTemplate(
       name: className,
       fields: fields,
+      genericConstraints: element.genericConstraints,
     );
 
     final classBuilderTemplate = ClassBuilderTemplate(
       fields: fields,
       parentClassName: className,
+      genericConstraints: element.genericConstraints,
     );
 
     yield "//ignore_for_file: close_sinks";

@@ -4,12 +4,13 @@ class ChildClassTemplate {
   final String name;
   final String parentClassName;
   final List<FieldBlueprint> fields;
+  final String genericConstraints;
 
-  ChildClassTemplate({
-    required this.name,
-    required this.fields,
-    required this.parentClassName,
-  });
+  ChildClassTemplate(
+      {required this.name,
+      required this.fields,
+      required this.parentClassName,
+      required this.genericConstraints});
 
   String parameterDefinition(FieldBlueprint field) {
     final name = field.name;
@@ -20,17 +21,26 @@ class ChildClassTemplate {
     return "$type $name";
   }
 
+  String get parametersDefinition {
+    if (fields.isEmpty) return "";
+    return "{${fields.map(parameterDefinition).join(",")}}";
+  }
+
   String parameterAssignment(FieldBlueprint field) {
-    if (!field.isPublisher) return "this.${field.name} = ${field.name}";
+    String privateExpression = field.isPrivate ? "_" : "";
 
-    if (field.defaultValue == null)
-      return "this.\$${field.name} = BehaviorSubject.seeded(${field.name})";
-
-    if (field.defaultValue is String) {
-      return "this.\$${field.name} = BehaviorSubject.seeded(${field.name} ?? \"${field.defaultValue}\")";
+    if (!field.isPublisher) {
+      return "this.$privateExpression${field.name} = ${field.name}";
     }
 
-    return "this.\$${field.name} = BehaviorSubject.seeded(${field.name} ?? ${field.defaultValue})";
+    if (field.defaultValue == null)
+      return "this.$privateExpression\$${field.name} = BehaviorSubject.seeded(${field.name})";
+
+    if (field.defaultValue is String) {
+      return "this.$privateExpression\$${field.name} = BehaviorSubject.seeded(${field.name} ?? \"${field.defaultValue}\")";
+    }
+
+    return "this.$privateExpression\$${field.name} = BehaviorSubject.seeded(${field.name} ?? ${field.defaultValue})";
   }
 
   String fieldDefinition(FieldBlueprint field) {
@@ -38,7 +48,12 @@ class ChildClassTemplate {
     final type = field.type;
 
     if (field.isPublisher) return "final BehaviorSubject<$type> \$$name;";
-    if (field.isFinal) return "final $type $name;";
+    if (field.isFinal) {
+      if (field.isPrivate) return "final $type _$name;";
+      return "final $type $name;";
+    }
+
+    if (field.isPrivate) return "$type _$name;";
 
     return "$type $name;";
   }
@@ -46,13 +61,13 @@ class ChildClassTemplate {
   @override
   String toString() {
     return '''
-    class $name extends ${parentClassName}Builder{
+    class $name$genericConstraints extends ${parentClassName}Builder$genericConstraints{
       ${fields.where((element) => !element.isPublisher).map(fieldDefinition).join("\n")}
       
       ${fields.where((element) => element.isPublisher).map(fieldDefinition).join("\n")}
       
      
-      $name({${fields.map(parameterDefinition).join(",")}}):${fields.map(parameterAssignment).join(",")}{
+      $name($parametersDefinition)${fields.isEmpty ? "" : ":"}${fields.map(parameterAssignment).join(",")}{
         this.shouldEnableLogger();
       }
       
@@ -83,7 +98,7 @@ class ChildClassTemplate {
       @override
       void dispose(){
         super.dispose();
-        ${fields.map((field) => "\$${field.name}.close();").join("\n")}
+        ${fields.where((field) => field.isPublisher).map((field) => "\$${field.name}.close();").join("\n")}
       }
     }
     ''';
