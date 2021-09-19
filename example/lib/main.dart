@@ -36,7 +36,10 @@ class MyHomePage extends HookWidget {
   @override
   Widget build(BuildContext context) {
     final counterViewModel = useViewModel<CounterViewModel>(
-      CounterViewModelBuilder.build(),
+      CounterViewModelBuilder.build(
+        httpService: HttpService(),
+        count: 5,
+      ),
       onInit: (viewModel) => print("Hola"),
       observe: (viewModel) => [
         viewModel.$count.listen((value) {

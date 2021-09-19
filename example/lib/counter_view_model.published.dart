@@ -20,16 +20,23 @@ abstract class _$CounterViewModel extends ObservableObject {
 abstract class CounterViewModelBuilder extends CounterViewModel {
   CounterViewModelBuilder();
 
-  factory CounterViewModelBuilder.build({int? count, String? name}) =>
-      _CounterViewModel(count: count, name: name);
+  factory CounterViewModelBuilder.build(
+          {required int count,
+          required HttpService httpService,
+          String? name}) =>
+      _CounterViewModel(count: count, httpService: httpService, name: name);
 }
 
 class _CounterViewModel extends CounterViewModelBuilder {
+  HttpService _httpService;
+
   final BehaviorSubject<int> $count;
   final BehaviorSubject<String> $name;
 
-  _CounterViewModel({int? count, String? name})
-      : this.$count = BehaviorSubject.seeded(count ?? 2),
+  _CounterViewModel(
+      {required int count, required HttpService httpService, String? name})
+      : this.$count = BehaviorSubject.seeded(count),
+        this._httpService = httpService,
         this.$name = BehaviorSubject.seeded(name ?? "Haris") {
     this.shouldEnableLogger();
   }
@@ -63,51 +70,5 @@ class _CounterViewModel extends CounterViewModelBuilder {
     super.dispose();
     $count.close();
     $name.close();
-  }
-}
-
-abstract class _$NewViewModel extends ObservableObject {
-  abstract final BehaviorSubject<T> $age;
-
-  abstract final Stream didChange;
-
-  bool get enableLogging => false;
-}
-
-abstract class NewViewModelBuilder extends NewViewModel {
-  NewViewModelBuilder();
-
-  factory NewViewModelBuilder.build({required T age}) =>
-      _NewViewModel(age: age);
-}
-
-class _NewViewModel extends NewViewModelBuilder {
-  T age;
-
-  _NewViewModel({required T age}) : this.age = age {
-    this.shouldEnableLogger();
-  }
-
-  Stream get didChange => MergeStream([]);
-
-  void shouldEnableLogger() {
-    if (!enableLogging) return;
-
-    didChange.listen(dumpLogOnChange).addTo(disposables);
-  }
-
-  void dumpLogOnChange(signal) {
-    print("------------------");
-    print("DidChange:");
-    print("NewViewModel{");
-
-    print("}");
-    print("------------------");
-  }
-
-  @override
-  void dispose() {
-    super.dispose();
-    $age.close();
   }
 }
