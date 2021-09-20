@@ -1,4 +1,5 @@
 import 'package:analyzer/dart/element/element.dart';
+import 'package:analyzer/dart/element/type.dart';
 import 'package:analyzer/dart/element/visitor.dart';
 import 'package:published/published.dart';
 import 'package:source_gen/source_gen.dart';
@@ -6,11 +7,6 @@ import 'package:source_gen/source_gen.dart';
 import 'field_blueprint.dart';
 
 final _publisherTypeChecker = TypeChecker.fromRuntime(Publisher);
-
-final stripGenericType = (String type) {
-  final start = type.indexOf("<");
-  return start != -1 ? type.substring(start + 1, type.length - 1) : type;
-};
 
 class FieldElementVisitor extends SimpleElementVisitor {
   final List<FieldBlueprint> fields = [];
@@ -23,7 +19,9 @@ class FieldElementVisitor extends SimpleElementVisitor {
 
     final defaultValueReader = ConstantReader(annotation).peek("defaultValue");
 
-    if (defaultValueReader != null) {
+    final isGenericType = element.type is TypeParameterType;
+
+    if (defaultValueReader != null && !isGenericType) {
       final checker = TypeChecker.fromStatic(element.type);
       if (!defaultValueReader.instanceOf(checker))
         throw InvalidGenerationSourceError(
@@ -33,11 +31,10 @@ class FieldElementVisitor extends SimpleElementVisitor {
     }
 
     final field = FieldBlueprint(
-      name:
-          element.isPrivate ? element.name.replaceFirst("_", "") : element.name,
+      name: element.name.replaceFirst("_", ""),
       type: element.type.toString(),
       isPublisher: annotation != null,
-      defaultValue: defaultValueReader?.literalValue,
+      defaultValue: !isGenericType ? defaultValueReader?.literalValue : null,
       isFinal: element.isFinal,
       isPrivate: element.isPrivate,
     );
