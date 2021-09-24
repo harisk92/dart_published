@@ -11,6 +11,8 @@ dependencies:
   build_config: ^1.0.0
   source_gen: ^1.0.0
   published: ">=0.0.10 <1.0.0"
+  analyzer: ^2.3.0
+
 
 
 dev_dependencies:
