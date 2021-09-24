@@ -10,44 +10,35 @@ part of 'counter_view_model.dart';
 
 abstract class _$CounterViewModel extends ObservableObject {
   abstract final BehaviorSubject<int> $count;
-  abstract final BehaviorSubject<String> $name;
 
   abstract final Stream didChange;
 
   bool get enableLogging => false;
+
+  void onBind() {}
 }
 
 abstract class CounterViewModelBuilder extends CounterViewModel {
   CounterViewModelBuilder();
 
-  factory CounterViewModelBuilder.build(
-          {required int count,
-          required HttpService httpService,
-          String? name}) =>
-      _CounterViewModel(count: count, httpService: httpService, name: name);
+  factory CounterViewModelBuilder.build({required int count}) =>
+      _CounterViewModel(count: count);
 }
 
 class _CounterViewModel extends CounterViewModelBuilder {
-  HttpService _httpService;
-
   final BehaviorSubject<int> $count;
-  final BehaviorSubject<String> $name;
 
-  _CounterViewModel(
-      {required int count, required HttpService httpService, String? name})
-      : this.$count = BehaviorSubject.seeded(count),
-        this._httpService = httpService,
-        this.$name = BehaviorSubject.seeded(name ?? "Haris") {
+  _CounterViewModel({required int count})
+      : this.$count = BehaviorSubject.seeded(count) {
     this.shouldEnableLogger();
+    this.onBind();
   }
 
   int get count => this.$count.value;
-  String get name => this.$name.value;
 
   set count(int value) => this.$count.add(value);
-  set name(String value) => this.$name.add(value);
 
-  Stream get didChange => MergeStream([$count, $name]);
+  Stream get didChange => MergeStream([$count]);
 
   void shouldEnableLogger() {
     if (!enableLogging) return;
@@ -60,7 +51,6 @@ class _CounterViewModel extends CounterViewModelBuilder {
     print("DidChange:");
     print("CounterViewModel{");
     print(" count: ${this.count}");
-    print(" name: ${this.name}");
     print("}");
     print("------------------");
   }
@@ -69,6 +59,5 @@ class _CounterViewModel extends CounterViewModelBuilder {
   void dispose() {
     super.dispose();
     $count.close();
-    $name.close();
   }
 }

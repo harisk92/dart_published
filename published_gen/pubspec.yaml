@@ -1,7 +1,7 @@
 name: published_gen
 description: A new Flutter package.
-version: 0.0.1
-homepage:
+version: 0.0.10
+homepage: https://github.com/harisk92/dart_published
 
 environment:
   sdk: ">=2.13.0 <3.0.0"
@@ -10,8 +10,8 @@ dependencies:
   build: ^2.0.1
   build_config: ^1.0.0
   source_gen: ^1.0.0
-  published:
-    path: ../published
+  published: ">=0.0.10 <1.0.0"
+
 
 dev_dependencies:
   json_serializable: ^5.0.0

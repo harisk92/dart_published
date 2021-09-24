@@ -1,6 +1,4 @@
 import 'package:flutter/material.dart';
-import 'package:flutter_app/use_view_model_hook.dart';
-import 'package:flutter_hooks/flutter_hooks.dart';
 import 'package:published/published.dart';
 
 import 'counter_view_model.dart';
@@ -27,31 +25,27 @@ class MyApp extends StatelessWidget {
         // is not restarted.
         primarySwatch: Colors.blue,
       ),
-      home: MyHomePage(),
+      home: CounterPage(),
     );
   }
 }
 
-class MyHomePage extends HookWidget {
+class CounterPage extends StatefulWidget {
+  @override
+  _CounterPageState createState() => _CounterPageState();
+}
+
+class _CounterPageState extends State<CounterPage> {
+  late final CounterViewModel counterViewModel;
+
+  @override
+  void initState() {
+    super.initState();
+    counterViewModel = CounterViewModelBuilder.build(count: 0);
+  }
+
   @override
   Widget build(BuildContext context) {
-    final counterViewModel = useViewModel<CounterViewModel>(
-      CounterViewModelBuilder.build(
-        httpService: HttpService(),
-        count: 5,
-      ),
-      onInit: (viewModel) => print("Hola"),
-      observe: (viewModel) => [
-        viewModel.$count.listen((value) {
-          if (value <= 5) return;
-          viewModel.count = 5;
-          final snackBar = SnackBar(content: Text('You reached the limit'));
-          ScaffoldMessenger.of(context).showSnackBar(snackBar);
-        }),
-        viewModel.$count.listen((value) => print("New value is $value")),
-      ],
-    );
-
     return Scaffold(
       appBar: AppBar(
         title: Text("Test"),
