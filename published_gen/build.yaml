@@ -7,7 +7,7 @@ targets:
 
 builders:
   published:
-    import: "package:published_gen/builder.dart"
+    import: "package:published_gen/published_gen.dart"
     builder_factories: ["published"]
     build_extensions: { ".dart": [".published.dart"] }
     auto_apply: dependents
