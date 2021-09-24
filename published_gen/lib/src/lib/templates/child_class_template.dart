@@ -69,6 +69,7 @@ class ChildClassTemplate {
      
       $name($parametersDefinition)${fields.isEmpty ? "" : ":"}${fields.map(parameterAssignment).join(",")}{
         this.shouldEnableLogger();
+        this.onBind();
       }
       
       ${fields.where((element) => element.isPublisher).map((field) => field.getterTemplate).join("\n")}

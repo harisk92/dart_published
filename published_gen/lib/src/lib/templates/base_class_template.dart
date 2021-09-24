@@ -26,6 +26,8 @@ class BaseClassTemplate {
        abstract final Stream didChange;
        
        bool get enableLogging => false;
+       
+       void onBind(){}
     }
     ''';
   }
