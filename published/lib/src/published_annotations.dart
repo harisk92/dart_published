@@ -1,5 +1,10 @@
-class PublishedAnnotation {
-  const PublishedAnnotation();
+class Published {
+  const Published();
 }
 
-final published = PublishedAnnotation();
+class Publisher {
+  final Object? defaultValue;
+  const Publisher({this.defaultValue});
+}
+
+const published = Published();

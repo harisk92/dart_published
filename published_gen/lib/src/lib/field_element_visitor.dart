@@ -1,36 +1,42 @@
 import 'package:analyzer/dart/element/element.dart';
+import 'package:analyzer/dart/element/type.dart';
 import 'package:analyzer/dart/element/visitor.dart';
+import 'package:published/published.dart';
+import 'package:source_gen/source_gen.dart';
 
 import 'field_blueprint.dart';
 
-final stripGenericType = (String type) {
-  final start = type.indexOf("<");
-  return start != -1 ? type.substring(start + 1, type.length - 1) : type;
-};
+final _publisherTypeChecker = TypeChecker.fromRuntime(Publisher);
 
 class FieldElementVisitor extends SimpleElementVisitor {
   final List<FieldBlueprint> fields = [];
 
   @override
   visitFieldElement(FieldElement element) {
-    if (!element.name.startsWith("\$")) return;
+    if (!element.isAbstract) return;
 
-    final fieldType = element.type.toString();
+    final annotation = _publisherTypeChecker.firstAnnotationOf(element);
 
-    if (!fieldType.startsWith("BehaviorSubject")) {
-      throw Exception("Field is not of type Published");
+    final defaultValueReader = ConstantReader(annotation).peek("defaultValue");
+
+    final isGenericType = element.type is TypeParameterType;
+
+    if (defaultValueReader != null && !isGenericType) {
+      final checker = TypeChecker.fromStatic(element.type);
+      if (!defaultValueReader.instanceOf(checker))
+        throw InvalidGenerationSourceError(
+          "Default value of ${element.name} is not of type ${element.type}",
+          element: element,
+        );
     }
 
-    final type = fieldType.toString().substring(
-          fieldType.toString().indexOf("<") + 1,
-          fieldType.toString().length - 1,
-        );
-
-    print("Processing field : ${element.name} of type $type");
-
     final field = FieldBlueprint(
-      name: element.name,
-      type: type,
+      name: element.name.replaceFirst("_", ""),
+      type: element.type.toString(),
+      isPublisher: annotation != null,
+      defaultValue: !isGenericType ? defaultValueReader?.literalValue : null,
+      isFinal: element.isFinal,
+      isPrivate: element.isPrivate,
     );
 
     fields.add(field);

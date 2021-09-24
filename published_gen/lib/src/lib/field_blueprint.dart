@@ -5,10 +5,18 @@ import 'templates/setter_template.dart';
 class FieldBlueprint {
   final String name;
   final String type;
+  final bool isPublisher;
+  final bool isFinal;
+  final bool isPrivate;
+  final Object? defaultValue;
 
   FieldBlueprint({
     required this.name,
     required this.type,
+    this.defaultValue,
+    this.isPublisher = false,
+    this.isFinal = false,
+    this.isPrivate = false,
   });
 
   GetterTemplate get getterTemplate => GetterTemplate(
@@ -22,4 +30,8 @@ class FieldBlueprint {
         type: type,
         fieldName: name,
       );
+
+  bool get isRequired => !isNullable && defaultValue == null;
+
+  bool get isNullable => type.endsWith("?");
 }
